@@ -14,10 +14,13 @@ from torch.autograd import Variable
 from torchvision import models
 import torch.utils.model_zoo as model_zoo
 import torch.nn.functional as F
-
+import torchvision.transforms as transforms
+from tqdm import tqdm
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from miscc.config import cfg
+from datasets import TextDatasetDAMSM_Text
+from datasets import prepare_data_text
 
 
 def conv1x1(in_planes, out_planes, bias=False):
@@ -27,92 +30,6 @@ def conv1x1(in_planes, out_planes, bias=False):
 
 
 # ############## Text2Image Encoder-Decoder #######
-class RNN_ENCODER(nn.Module):
-    def __init__(self, ntoken, ninput=300, drop_prob=0.5,
-                 nhidden=128, nlayers=1, bidirectional=True):
-        super(RNN_ENCODER, self).__init__()
-        self.n_steps = cfg.TEXT.WORDS_NUM
-        self.ntoken = ntoken  # size of the dictionary
-        self.ninput = ninput  # size of each embedding vector
-        self.drop_prob = drop_prob  # probability of an element to be zeroed
-        self.nlayers = nlayers  # Number of recurrent layers
-        self.bidirectional = bidirectional
-        self.rnn_type = cfg.RNN_TYPE
-        if bidirectional:
-            self.num_directions = 2
-        else:
-            self.num_directions = 1
-        # number of features in the hidden state
-        self.nhidden = nhidden // self.num_directions
-
-        self.define_module()
-        self.init_weights()
-
-    def define_module(self):
-        self.encoder = nn.Embedding(self.ntoken, self.ninput)
-        self.drop = nn.Dropout(self.drop_prob)
-        if self.rnn_type == 'LSTM':
-            # dropout: If non-zero, introduces a dropout layer on
-            # the outputs of each RNN layer except the last layer
-            self.rnn = nn.LSTM(self.ninput, self.nhidden,
-                               self.nlayers, batch_first=True,
-                               dropout=self.drop_prob,
-                               bidirectional=self.bidirectional)
-        elif self.rnn_type == 'GRU':
-            self.rnn = nn.GRU(self.ninput, self.nhidden,
-                              self.nlayers, batch_first=True,
-                              dropout=self.drop_prob,
-                              bidirectional=self.bidirectional)
-        else:
-            raise NotImplementedError
-
-    def init_weights(self):
-        initrange = 0.1
-        self.encoder.weight.data.uniform_(-initrange, initrange)
-        # Do not need to initialize RNN parameters, which have been initialized
-        # http://pytorch.org/docs/master/_modules/torch/nn/modules/rnn.html#LSTM
-        # self.decoder.weight.data.uniform_(-initrange, initrange)
-        # self.decoder.bias.data.fill_(0)
-
-    def init_hidden(self, bsz):
-        weight = next(self.parameters()).data
-        if self.rnn_type == 'LSTM':
-            return (Variable(weight.new(self.nlayers * self.num_directions,
-                                        bsz, self.nhidden).zero_()),
-                    Variable(weight.new(self.nlayers * self.num_directions,
-                                        bsz, self.nhidden).zero_()))
-        else:
-            return Variable(weight.new(self.nlayers * self.num_directions,
-                                       bsz, self.nhidden).zero_())
-
-    def forward(self, captions, cap_lens, hidden, mask=None):
-        # input: torch.LongTensor of size batch x n_steps
-        # --> emb: batch x n_steps x ninput
-        emb = self.drop(self.encoder(captions))
-        #
-        # Returns: a PackedSequence object
-        cap_lens = cap_lens.data.tolist()
-        emb = pack_padded_sequence(emb, cap_lens, batch_first=True)
-        # #hidden and memory (num_layers * num_directions, batch, hidden_size):
-        # tensor containing the initial hidden state for each element in batch.
-        # #output (batch, seq_len, hidden_size * num_directions)
-        # #or a PackedSequence object:
-        # tensor containing output features (h_t) from the last layer of RNN
-        output, hidden = self.rnn(emb, hidden)
-        # PackedSequence object
-        # --> (batch, seq_len, hidden_size * num_directions)
-        output = pad_packed_sequence(output, batch_first=True)[0]
-        # output = self.drop(output)
-        # --> batch x hidden_size*num_directions x seq_len
-        words_emb = output.transpose(1, 2)
-        # --> batch x num_directions*hidden_size
-        if self.rnn_type == 'LSTM':
-            sent_emb = hidden[0].transpose(0, 1).contiguous()
-        else:
-            sent_emb = hidden.transpose(0, 1).contiguous()
-        sent_emb = sent_emb.view(-1, self.nhidden * self.num_directions)
-        return words_emb, sent_emb
-
 
 class CNN_ENCODER(nn.Module):
     def __init__(self, nef):
@@ -222,3 +139,209 @@ class CNN_ENCODER(nn.Module):
         if features is not None:
             features = self.emb_features(features)
         return features, cnn_code
+
+
+class RNN_ENCODER(nn.Module):
+    def __init__(self, ntoken, ninput=300, drop_prob=0.5,
+                 nhidden=128, nlayers=1, bidirectional=True):
+        super(RNN_ENCODER, self).__init__()
+        self.n_steps = cfg.TEXT.WORDS_NUM
+        self.ntoken = ntoken  # size of the dictionary
+        self.ninput = ninput  # size of each embedding vector
+        self.drop_prob = drop_prob  # probability of an element to be zeroed
+        self.nlayers = nlayers  # Number of recurrent layers
+        self.bidirectional = bidirectional
+        self.rnn_type = cfg.RNN_TYPE
+        if bidirectional:
+            self.num_directions = 2
+        else:
+            self.num_directions = 1
+        # number of features in the hidden state
+        self.nhidden = nhidden // self.num_directions
+
+        self.define_module()
+        self.init_weights()
+
+    def define_module(self):
+        self.encoder = nn.Embedding(self.ntoken, self.ninput)
+        self.drop = nn.Dropout(self.drop_prob)
+        if self.rnn_type == 'LSTM':
+            # dropout: If non-zero, introduces a dropout layer on
+            # the outputs of each RNN layer except the last layer
+            self.rnn = nn.LSTM(self.ninput, self.nhidden,
+                               self.nlayers, batch_first=True,
+                               dropout=self.drop_prob,
+                               bidirectional=self.bidirectional)
+        elif self.rnn_type == 'GRU':
+            self.rnn = nn.GRU(self.ninput, self.nhidden,
+                              self.nlayers, batch_first=True,
+                              dropout=self.drop_prob,
+                              bidirectional=self.bidirectional)
+        else:
+            raise NotImplementedError
+
+    def init_weights(self):
+        initrange = 0.1
+        self.encoder.weight.data.uniform_(-initrange, initrange)
+        # Do not need to initialize RNN parameters, which have been initialized
+        # http://pytorch.org/docs/master/_modules/torch/nn/modules/rnn.html#LSTM
+        # self.decoder.weight.data.uniform_(-initrange, initrange)
+        # self.decoder.bias.data.fill_(0)
+
+    def init_hidden(self, bsz):
+        weight = next(self.parameters()).data
+        if self.rnn_type == 'LSTM':
+            return (Variable(weight.new(self.nlayers * self.num_directions,
+                                        bsz, self.nhidden).zero_()),
+                    Variable(weight.new(self.nlayers * self.num_directions,
+                                        bsz, self.nhidden).zero_()))
+        else:
+            return Variable(weight.new(self.nlayers * self.num_directions,
+                                       bsz, self.nhidden).zero_())
+
+    def forward(self, captions, cap_lens, hidden, mask=None):
+        # input: torch.LongTensor of size batch x n_steps
+        # --> emb: batch x n_steps x ninput
+        emb = self.drop(self.encoder(captions))
+        #
+        # Returns: a PackedSequence object
+        cap_lens = cap_lens.data.tolist()
+        emb = pack_padded_sequence(emb, cap_lens, batch_first=True)
+        # #hidden and memory (num_layers * num_directions, batch, hidden_size):
+        # tensor containing the initial hidden state for each element in batch.
+        # #output (batch, seq_len, hidden_size * num_directions)
+        # #or a PackedSequence object:
+        # tensor containing output features (h_t) from the last layer of RNN
+        output, hidden = self.rnn(emb, hidden)
+        # PackedSequence object
+        # --> (batch, seq_len, hidden_size * num_directions)
+        output = pad_packed_sequence(output, batch_first=True)[0]
+        # output = self.drop(output)
+        # --> batch x hidden_size*num_directions x seq_len
+        words_emb = output.transpose(1, 2)
+        # --> batch x num_directions*hidden_size
+        if self.rnn_type == 'LSTM':
+            sent_emb = hidden[0].transpose(0, 1).contiguous()
+        else:
+            sent_emb = hidden.transpose(0, 1).contiguous()
+        sent_emb = sent_emb.view(-1, self.nhidden * self.num_directions)
+        return words_emb, sent_emb
+    
+if __name__ == '__main__':
+    imsize = cfg.TREE.BASE_SIZE
+    batch_size = cfg.TRAIN.BATCH_SIZE
+    image_transform = transforms.Compose([
+        transforms.Resize(int(imsize * 76 / 64)),
+        transforms.RandomCrop(imsize),
+        transforms.RandomHorizontalFlip()])
+    
+    dataset = TextDatasetDAMSM_Text(cfg.DATA_DIR, 'train',
+                              base_size=cfg.TREE.BASE_SIZE,
+                              transform=image_transform)
+    # ixtoword = dataset.ixtoword
+    # print(dataset.n_words, dataset.embeddings_num)
+    assert dataset
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, drop_last=True,
+        shuffle=True, num_workers=int(cfg.WORKERS))
+
+    dataset_val = TextDatasetDAMSM_Text(cfg.DATA_DIR, 'validation',
+                                    base_size=cfg.TREE.BASE_SIZE,
+                                    transform=image_transform)
+    # ixtoword = dataset.ixtoword
+    # print(dataset.n_words, dataset.embeddings_num)
+    assert dataset_val
+    dataloader_val = torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, drop_last=True,
+        shuffle=True, num_workers=int(cfg.WORKERS))
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    text_encoder_ar = RNN_ENCODER(dataset.n_words_ar, nhidden=cfg.TEXT.EMBEDDING_DIM)
+    text_encoder_ar.cuda()
+    text_encoder_en = RNN_ENCODER(27297, nhidden=cfg.TEXT.EMBEDDING_DIM)
+    state_dict = torch.load(cfg.TEXT.DAMSM_NAME, map_location=lambda storage, loc: storage)
+    text_encoder_en.load_state_dict(state_dict)
+    text_encoder_en.cuda()
+    for p in text_encoder_en.parameters():
+        p.requires_grad = False
+    text_encoder_en.eval()
+    #fetch one batch of data from dataloader and print resutls
+
+    # for param in text_encoder_ar.parameters(): print(param.requires_grad)
+    # print('')
+    # for param in text_encoder_en.parameters(): print(param.requires_grad)
+
+
+    no_epochs = 5
+    best_val_loss = float('inf')
+    # Define the loss function and the optimizer
+    criterion = nn.MSELoss()  # Use Mean Squared Error loss for comparing embeddings
+    optimizer = torch.optim.Adam(text_encoder_ar.parameters(), lr=0.001)
+
+    for epoch in range(no_epochs):
+        data_iter = iter(dataloader)
+        total_train_loss = 0
+        print(f'Epoch: {epoch + 1}')
+        for step in tqdm(range(len(data_iter))):
+            data = next(data_iter)
+            captions_ar, sorted_cap_len_ar, captions_en, sorted_cap_len_en, class_ids_ar, class_ids_en, keys_ar, keys_en = prepare_data_text(
+                data)
+
+            # Initialize hidden states
+            hidden_ar = text_encoder_ar.init_hidden(cfg.TRAIN.BATCH_SIZE)
+            hidden_en = text_encoder_en.init_hidden(cfg.TRAIN.BATCH_SIZE)
+
+            # Get embeddings from Arabic text encoder
+            words_embs_ar, sent_emb_ar = text_encoder_ar(captions_ar, sorted_cap_len_ar, hidden_ar)
+            words_embs_ar, sent_emb_ar = words_embs_ar, sent_emb_ar
+
+            # Get embeddings from English text encoder
+            words_embs_en, sent_emb_en = text_encoder_en(captions_en, sorted_cap_len_en, hidden_en)
+            words_embs_en, sent_emb_en = words_embs_en.detach(), sent_emb_en.detach()
+
+            # Compute the loss
+            loss = criterion(sent_emb_ar, sent_emb_en)
+            total_train_loss += loss.item()
+
+            # Perform backpropagation
+            loss.backward()
+
+            # Update the model parameters
+            optimizer.step()
+
+            # Zero the gradients
+            optimizer.zero_grad()
+
+        print(f'Training Loss: {total_train_loss / len(data_iter)}')
+        data_iter_val = iter(dataloader_val)
+        total_val_loss = 0
+        with torch.no_grad():  # Disable gradient computation
+            for step in tqdm(range(len(data_iter_val))):
+                data = next(data_iter_val)
+                captions_ar, sorted_cap_len_ar, captions_en, sorted_cap_len_en, class_ids_ar, class_ids_en, keys_ar, keys_en = prepare_data_text(
+                    data)
+
+                # Initialize hidden states
+                hidden_ar = text_encoder_ar.init_hidden(cfg.TRAIN.BATCH_SIZE)
+                hidden_en = text_encoder_en.init_hidden(cfg.TRAIN.BATCH_SIZE)
+
+                # Get embeddings from Arabic text encoder
+                words_embs_ar, sent_emb_ar = text_encoder_ar(captions_ar, sorted_cap_len_ar, hidden_ar)
+                words_embs_ar, sent_emb_ar = words_embs_ar, sent_emb_ar
+
+                # Get embeddings from English text encoder
+                words_embs_en, sent_emb_en = text_encoder_en(captions_en, sorted_cap_len_en, hidden_en)
+                words_embs_en, sent_emb_en = words_embs_en.detach(), sent_emb_en.detach()
+
+                # Compute the validation loss
+                val_loss = criterion(sent_emb_ar, sent_emb_en)
+                total_val_loss += val_loss.item()
+
+        # Print the average validation loss after each epoch
+        avg_val_loss = total_val_loss / len(data_iter_val)
+        print(f"Epoch {epoch}, Validation Loss: {avg_val_loss}")
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            torch.save(text_encoder_ar.state_dict(), 'DAMSMencoders/text_encoder_ar.pth')
+            print(f"New best validation loss: {best_val_loss}. Saving model.")
+    #Write training loop for text_encoder

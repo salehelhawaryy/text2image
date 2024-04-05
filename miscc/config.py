@@ -21,7 +21,7 @@ cfg = __C
 # Dataset name: flowers, birds
 __C.DATASET_NAME = 'birds'
 __C.CONFIG_NAME = ''
-__C.DATA_DIR = ''
+__C.DATA_DIR = 'D:/Download (Chrome)/coco/coco/translated_coco'
 __C.GPU_ID = 0
 __C.CUDA = True
 __C.WORKERS = 6
@@ -72,10 +72,10 @@ __C.GAN.B_DCGAN = True
 
 
 __C.TEXT = edict()
-__C.TEXT.CAPTIONS_PER_IMAGE = 10
+__C.TEXT.CAPTIONS_PER_IMAGE = 5
 __C.TEXT.EMBEDDING_DIM = 256
 __C.TEXT.WORDS_NUM = 18
-__C.TEXT.DAMSM_NAME = '../DAMSMencoders/coco/text_encoder200.pth'
+__C.TEXT.DAMSM_NAME = 'DAMSMencoders/text_encoder100.pth'
 
 def _merge_a_into_b(a, b):
     """Merge config dictionary a into config dictionary b, clobbering the

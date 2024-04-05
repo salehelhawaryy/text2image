@@ -382,8 +382,8 @@ def train(dataloader, ixtoword, netG, netD, text_encoder, image_encoder,
 
             imgs = imags[0].to(device)
             real_features = netD(imgs)
-            print(f'Real features: f{real_features.shape}')
-            print(f'sentence: f{sent_emb.shape}')
+            # print(f'Real features: f{real_features.shape}')
+            # print(f'sentence: f{sent_emb.shape}')
             output = netD.module.COND_DNET(real_features, sent_emb)
             errD_real = torch.nn.ReLU()(1.0 - output).mean()
 

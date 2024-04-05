@@ -351,7 +351,7 @@ class TextDataset(data.Dataset):
             #     data_dir = '/data/scene_understanding/coco2014/train2014'
             # else:
             #     data_dir = '/data/scene_understanding/coco2014/val2014'
-            data_dir = '/kaggle/input/coco-2014-dataset-for-yolov3/coco2014/images/val2014'
+            data_dir = '/kaggle/input/coco2014/val2014/val2014'
         #
         img_name = '%s/%s.jpg' % (data_dir, key)
         imgs = get_imgs(img_name, self.imsize,

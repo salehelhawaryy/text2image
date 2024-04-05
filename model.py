@@ -230,15 +230,24 @@ class NetD(nn.Module):
         self.COND_DNET = D_GET_LOGITS(ndf)
 
     def forward(self, x):
-
+        print('')
+        print('')
         out = self.conv_img(x)
+        print(out.shape)
         out = self.block0(out)
+        print(out.shape)
         out = self.block1(out)
+        print(out.shape)
         out = self.block2(out)
+        print(out.shape)
         out = self.block3(out)
+        print(out.shape)
         out = self.block4(out)
+        print(out.shape)
         out = self.block5(out)
         print(out.shape)
+        print('')
+        print('')
 
         return out
 

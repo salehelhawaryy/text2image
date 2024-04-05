@@ -33,7 +33,7 @@ __C.USE_SN = False
 __C.loss = 'hinge'
 __C.TREE = edict()
 __C.TREE.BRANCH_NUM = 3
-__C.TREE.BASE_SIZE = 64
+__C.TREE.BASE_SIZE = 256
 
 
 # Training options

@@ -440,7 +440,7 @@ def train(dataloader, ixtoword, netG, netD, text_encoder, image_encoder,
         #cap_imgs = cap2img(ixtoword, captions, cap_lens)
 
         write_images_losses(writer, imgs, fake, errD, d_loss, errG, DAMSM, epoch)
-
+        print(f'Epoch {epoch} completed')
         if (epoch >= cfg.TRAIN.WARMUP_EPOCHS) and (epoch % cfg.TRAIN.GSAVE_INTERVAL == 0):
             torch.save(netG.state_dict(), '%s/models/netG_%03d.pth' % (base_dir, epoch))
         if (epoch >= cfg.TRAIN.WARMUP_EPOCHS) and (epoch % cfg.TRAIN.DSAVE_INTERVAL == 0):

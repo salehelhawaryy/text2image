@@ -523,7 +523,7 @@ if __name__ == "__main__":
     netG = DataParallelWithCallback(netG)
     netD = nn.DataParallel(netD)
                                 #dataset.n_words
-    text_encoder = RNN_ENCODER(27297, nhidden=cfg.TEXT.EMBEDDING_DIM)
+    text_encoder = RNN_ENCODER(dataset.n_words, nhidden=cfg.TEXT.EMBEDDING_DIM)
     state_dict = torch.load(cfg.TEXT.DAMSM_NAME, map_location=lambda storage, loc: storage)
     text_encoder.load_state_dict(state_dict)
     text_encoder.cuda()

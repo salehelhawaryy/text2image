@@ -245,103 +245,104 @@ if __name__ == '__main__':
         dataset, batch_size=batch_size, drop_last=True,
         shuffle=True, num_workers=int(cfg.WORKERS))
 
-    dataset_val = TextDatasetDAMSM_Text(cfg.DATA_DIR, 'validation',
-                                    base_size=cfg.TREE.BASE_SIZE,
-                                    transform=image_transform)
-    # ixtoword = dataset.ixtoword
-    # print(dataset.n_words, dataset.embeddings_num)
-    assert dataset_val
-    dataloader_val = torch.utils.data.DataLoader(
-        dataset, batch_size=batch_size, drop_last=True,
-        shuffle=True, num_workers=int(cfg.WORKERS))
-    
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    text_encoder_ar = RNN_ENCODER(dataset.n_words_ar, nhidden=cfg.TEXT.EMBEDDING_DIM)
-    text_encoder_ar.cuda()
-    text_encoder_en = RNN_ENCODER(27297, nhidden=cfg.TEXT.EMBEDDING_DIM)
-    state_dict = torch.load(cfg.TEXT.DAMSM_NAME, map_location=lambda storage, loc: storage)
-    text_encoder_en.load_state_dict(state_dict)
-    text_encoder_en.cuda()
-    for p in text_encoder_en.parameters():
-        p.requires_grad = False
-    text_encoder_en.eval()
-    #fetch one batch of data from dataloader and print resutls
 
-    # for param in text_encoder_ar.parameters(): print(param.requires_grad)
-    # print('')
-    # for param in text_encoder_en.parameters(): print(param.requires_grad)
-
-
-    no_epochs = 5
-    best_val_loss = float('inf')
-    # Define the loss function and the optimizer
-    criterion = nn.MSELoss()  # Use Mean Squared Error loss for comparing embeddings
-    optimizer = torch.optim.Adam(text_encoder_ar.parameters(), lr=0.001)
-
-    for epoch in range(no_epochs):
-        data_iter = iter(dataloader)
-        total_train_loss = 0
-        print(f'Epoch: {epoch + 1}')
-        for step in tqdm(range(len(data_iter))):
-            data = next(data_iter)
-            captions_ar, sorted_cap_len_ar, captions_en, sorted_cap_len_en, class_ids_ar, class_ids_en, keys_ar, keys_en = prepare_data_text(
-                data)
-
-            # Initialize hidden states
-            hidden_ar = text_encoder_ar.init_hidden(cfg.TRAIN.BATCH_SIZE)
-            hidden_en = text_encoder_en.init_hidden(cfg.TRAIN.BATCH_SIZE)
-
-            # Get embeddings from Arabic text encoder
-            words_embs_ar, sent_emb_ar = text_encoder_ar(captions_ar, sorted_cap_len_ar, hidden_ar)
-            words_embs_ar, sent_emb_ar = words_embs_ar, sent_emb_ar
-
-            # Get embeddings from English text encoder
-            words_embs_en, sent_emb_en = text_encoder_en(captions_en, sorted_cap_len_en, hidden_en)
-            words_embs_en, sent_emb_en = words_embs_en.detach(), sent_emb_en.detach()
-
-            # Compute the loss
-            loss = criterion(sent_emb_ar, sent_emb_en)
-            total_train_loss += loss.item()
-
-            # Perform backpropagation
-            loss.backward()
-
-            # Update the model parameters
-            optimizer.step()
-
-            # Zero the gradients
-            optimizer.zero_grad()
-
-        print(f'Training Loss: {total_train_loss / len(data_iter)}')
-        data_iter_val = iter(dataloader_val)
-        total_val_loss = 0
-        with torch.no_grad():  # Disable gradient computation
-            for step in tqdm(range(len(data_iter_val))):
-                data = next(data_iter_val)
-                captions_ar, sorted_cap_len_ar, captions_en, sorted_cap_len_en, class_ids_ar, class_ids_en, keys_ar, keys_en = prepare_data_text(
-                    data)
-
-                # Initialize hidden states
-                hidden_ar = text_encoder_ar.init_hidden(cfg.TRAIN.BATCH_SIZE)
-                hidden_en = text_encoder_en.init_hidden(cfg.TRAIN.BATCH_SIZE)
-
-                # Get embeddings from Arabic text encoder
-                words_embs_ar, sent_emb_ar = text_encoder_ar(captions_ar, sorted_cap_len_ar, hidden_ar)
-                words_embs_ar, sent_emb_ar = words_embs_ar, sent_emb_ar
-
-                # Get embeddings from English text encoder
-                words_embs_en, sent_emb_en = text_encoder_en(captions_en, sorted_cap_len_en, hidden_en)
-                words_embs_en, sent_emb_en = words_embs_en.detach(), sent_emb_en.detach()
-
-                # Compute the validation loss
-                val_loss = criterion(sent_emb_ar, sent_emb_en)
-                total_val_loss += val_loss.item()
-
-        # Print the average validation loss after each epoch
-        avg_val_loss = total_val_loss / len(data_iter_val)
-        print(f"Epoch {epoch}, Validation Loss: {avg_val_loss}")
-        if avg_val_loss < best_val_loss:
-            best_val_loss = avg_val_loss
-            torch.save(text_encoder_ar.state_dict(), 'DAMSMencoders/text_encoder_ar.pth')
-            print(f"New best validation loss: {best_val_loss}. Saving model.")
+    # dataset_val = TextDatasetDAMSM_Text(cfg.DATA_DIR, 'validation',
+    #                                 base_size=cfg.TREE.BASE_SIZE,
+    #                                 transform=image_transform)
+    # # ixtoword = dataset.ixtoword
+    # # print(dataset.n_words, dataset.embeddings_num)
+    # assert dataset_val
+    # dataloader_val = torch.utils.data.DataLoader(
+    #     dataset, batch_size=batch_size, drop_last=True,
+    #     shuffle=True, num_workers=int(cfg.WORKERS))
+    #
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # text_encoder_ar = RNN_ENCODER(dataset.n_words_ar, nhidden=cfg.TEXT.EMBEDDING_DIM)
+    # text_encoder_ar.cuda()
+    # text_encoder_en = RNN_ENCODER(27297, nhidden=cfg.TEXT.EMBEDDING_DIM)
+    # state_dict = torch.load(cfg.TEXT.DAMSM_NAME, map_location=lambda storage, loc: storage)
+    # text_encoder_en.load_state_dict(state_dict)
+    # text_encoder_en.cuda()
+    # for p in text_encoder_en.parameters():
+    #     p.requires_grad = False
+    # text_encoder_en.eval()
+    # #fetch one batch of data from dataloader and print resutls
+    #
+    # # for param in text_encoder_ar.parameters(): print(param.requires_grad)
+    # # print('')
+    # # for param in text_encoder_en.parameters(): print(param.requires_grad)
+    #
+    #
+    # no_epochs = 5
+    # best_val_loss = float('inf')
+    # # Define the loss function and the optimizer
+    # criterion = nn.MSELoss()  # Use Mean Squared Error loss for comparing embeddings
+    # optimizer = torch.optim.Adam(text_encoder_ar.parameters(), lr=0.001)
+    #
+    # for epoch in range(no_epochs):
+    #     data_iter = iter(dataloader)
+    #     total_train_loss = 0
+    #     print(f'Epoch: {epoch + 1}')
+    #     for step in tqdm(range(len(data_iter))):
+    #         data = next(data_iter)
+    #         captions_ar, sorted_cap_len_ar, captions_en, sorted_cap_len_en, class_ids_ar, class_ids_en, keys_ar, keys_en = prepare_data_text(
+    #             data)
+    #
+    #         # Initialize hidden states
+    #         hidden_ar = text_encoder_ar.init_hidden(cfg.TRAIN.BATCH_SIZE)
+    #         hidden_en = text_encoder_en.init_hidden(cfg.TRAIN.BATCH_SIZE)
+    #
+    #         # Get embeddings from Arabic text encoder
+    #         words_embs_ar, sent_emb_ar = text_encoder_ar(captions_ar, sorted_cap_len_ar, hidden_ar)
+    #         words_embs_ar, sent_emb_ar = words_embs_ar, sent_emb_ar
+    #
+    #         # Get embeddings from English text encoder
+    #         words_embs_en, sent_emb_en = text_encoder_en(captions_en, sorted_cap_len_en, hidden_en)
+    #         words_embs_en, sent_emb_en = words_embs_en.detach(), sent_emb_en.detach()
+    #
+    #         # Compute the loss
+    #         loss = criterion(sent_emb_ar, sent_emb_en)
+    #         total_train_loss += loss.item()
+    #
+    #         # Perform backpropagation
+    #         loss.backward()
+    #
+    #         # Update the model parameters
+    #         optimizer.step()
+    #
+    #         # Zero the gradients
+    #         optimizer.zero_grad()
+    #
+    #     print(f'Training Loss: {total_train_loss / len(data_iter)}')
+    #     data_iter_val = iter(dataloader_val)
+    #     total_val_loss = 0
+    #     with torch.no_grad():  # Disable gradient computation
+    #         for step in tqdm(range(len(data_iter_val))):
+    #             data = next(data_iter_val)
+    #             captions_ar, sorted_cap_len_ar, captions_en, sorted_cap_len_en, class_ids_ar, class_ids_en, keys_ar, keys_en = prepare_data_text(
+    #                 data)
+    #
+    #             # Initialize hidden states
+    #             hidden_ar = text_encoder_ar.init_hidden(cfg.TRAIN.BATCH_SIZE)
+    #             hidden_en = text_encoder_en.init_hidden(cfg.TRAIN.BATCH_SIZE)
+    #
+    #             # Get embeddings from Arabic text encoder
+    #             words_embs_ar, sent_emb_ar = text_encoder_ar(captions_ar, sorted_cap_len_ar, hidden_ar)
+    #             words_embs_ar, sent_emb_ar = words_embs_ar, sent_emb_ar
+    #
+    #             # Get embeddings from English text encoder
+    #             words_embs_en, sent_emb_en = text_encoder_en(captions_en, sorted_cap_len_en, hidden_en)
+    #             words_embs_en, sent_emb_en = words_embs_en.detach(), sent_emb_en.detach()
+    #
+    #             # Compute the validation loss
+    #             val_loss = criterion(sent_emb_ar, sent_emb_en)
+    #             total_val_loss += val_loss.item()
+    #
+    #     # Print the average validation loss after each epoch
+    #     avg_val_loss = total_val_loss / len(data_iter_val)
+    #     print(f"Epoch {epoch}, Validation Loss: {avg_val_loss}")
+    #     if avg_val_loss < best_val_loss:
+    #         best_val_loss = avg_val_loss
+    #         torch.save(text_encoder_ar.state_dict(), 'DAMSMencoders/text_encoder_ar.pth')
+    #         print(f"New best validation loss: {best_val_loss}. Saving model.")
     #Write training loop for text_encoder

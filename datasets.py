@@ -206,7 +206,7 @@ class TextDataset(data.Dataset):
                     cap = cap.replace("\ufffd\ufffd", " ")
                     # picks out sequences of alphanumeric characters as tokens
                     # and drops everything else
-                    tokenizer = RegexpTokenizer(r'\w+')
+                    tokenizer = RegexpTokenizer(r'[\u0621-\u064A]+')
                     tokens = tokenizer.tokenize(cap.lower())
                     # print('tokens', tokens)
                     if len(tokens) == 0:
@@ -268,8 +268,8 @@ class TextDataset(data.Dataset):
 
     def load_text_data(self, data_dir, split):
         filepath = os.path.join(data_dir, 'captions.pickle')
-        train_names = self.load_filenames(data_dir, 'train')
-        test_names = self.load_filenames(data_dir, 'test')
+        train_names = self.load_filenames(data_dir, 'train_ar')
+        test_names = self.load_filenames(data_dir, 'test_ar')
         if not os.path.isfile(filepath):
             train_captions = self.load_captions(data_dir, train_names)
             test_captions = self.load_captions(data_dir, test_names)
@@ -347,10 +347,11 @@ class TextDataset(data.Dataset):
         else:
             bbox = None
             #data_dir = self.data_dir
-            if self.split_name == 'train':
-                data_dir = '/data/scene_understanding/coco2014/train2014'
-            else:
-                data_dir = '/data/scene_understanding/coco2014/val2014'
+            # if self.split_name == 'train':
+            #     data_dir = '/data/scene_understanding/coco2014/train2014'
+            # else:
+            #     data_dir = '/data/scene_understanding/coco2014/val2014'
+            data_dir = '/kaggle/input/coco-2014-dataset-for-yolov3/coco2014/images/val2014'
         #
         img_name = '%s/%s.jpg' % (data_dir, key)
         imgs = get_imgs(img_name, self.imsize,
@@ -448,6 +449,8 @@ class TextDatasetDAMSM_Text(data.Dataset):
                         tokenizer = RegexpTokenizer(r'\w+')
                     tokens = tokenizer.tokenize(cap.lower())
                     # print('tokens', tokens)
+                    if i == 123 and cnt == 3:
+                        print(cap)
                     if len(tokens) == 0:
                         print('cap token == 0', i, cnt, cap_path)
                         continue

@@ -444,9 +444,9 @@ def train(dataloader, ixtoword, netG, netD, text_encoder, image_encoder,
         write_images_losses(writer, imgs, fake, errD, d_loss, errG, DAMSM, epoch)
         print(f'Epoch {epoch} completed')
         if (epoch >= cfg.TRAIN.WARMUP_EPOCHS) and (epoch % cfg.TRAIN.GSAVE_INTERVAL == 0):
-            torch.save(netG.state_dict(), '%s/models/netG_%03d.pth' % (base_dir, epoch))
+            torch.save(netG.state_dict(), '/kaggle/working/models/netG_%03d.pth' % epoch)
         if (epoch >= cfg.TRAIN.WARMUP_EPOCHS) and (epoch % cfg.TRAIN.DSAVE_INTERVAL == 0):
-            torch.save(netD.state_dict(), '%s/models/netD_%03d.pth' % (base_dir, epoch))
+            torch.save(netD.state_dict(), '/kaggle/working/models/netD_%03d.pth' % epoch)
         break
 
 

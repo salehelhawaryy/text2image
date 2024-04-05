@@ -73,7 +73,7 @@ __C.GAN.B_DCGAN = True
 
 __C.TEXT = edict()
 __C.TEXT.CAPTIONS_PER_IMAGE = 5
-__C.TEXT.EMBEDDING_DIM = 256
+__C.TEXT.EMBEDDING_DIM = 512
 __C.TEXT.WORDS_NUM = 18
 __C.TEXT.DAMSM_NAME = 'DAMSMencoders/text_encoder100.pth'
 

@@ -209,7 +209,6 @@ class D_GET_LOGITS(nn.Module):
 
         y = y.view(-1, 256, 1, 1)
         y = y.repeat(1, 1, 4, 4)
-        print(out.shape, y.shape)
         h_c_code = torch.cat((out, y), 1)
         out = self.joint_conv(h_c_code)
         return out

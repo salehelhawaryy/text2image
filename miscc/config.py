@@ -49,7 +49,7 @@ __C.TRAIN.FLAG = True
 __C.TRAIN.NET_E = ''
 __C.TRAIN.NET_G = ''
 __C.TRAIN.B_NET_D = True
-__C.TRAIN.NF = 32
+__C.TRAIN.NF = 16
 __C.TRAIN.SMOOTH = edict()
 __C.TRAIN.SMOOTH.GAMMA1 = 5.0
 __C.TRAIN.SMOOTH.GAMMA3 = 10.0
@@ -73,9 +73,9 @@ __C.GAN.B_DCGAN = True
 
 __C.TEXT = edict()
 __C.TEXT.CAPTIONS_PER_IMAGE = 5
-__C.TEXT.EMBEDDING_DIM = 512
+__C.TEXT.EMBEDDING_DIM = 256
 __C.TEXT.WORDS_NUM = 18
-__C.TEXT.DAMSM_NAME = 'DAMSMencoders/text_encoder100.pth'
+__C.TEXT.DAMSM_NAME = 'DAMSMencoders/text_encoder_ar.pth'
 
 def _merge_a_into_b(a, b):
     """Merge config dictionary a into config dictionary b, clobbering the

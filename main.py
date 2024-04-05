@@ -371,7 +371,7 @@ def train(dataloader, ixtoword, netG, netD, text_encoder, image_encoder,
         data_iter = iter(dataloader)
         # for step, data in enumerate(dataloader, 0):
         for step in tqdm(range(len(data_iter))):
-            data = data_iter.next()
+            data = next(data_iter)
 
             imags, captions, cap_lens, class_ids, keys = prepare_data(data)
             hidden = text_encoder.init_hidden(batch_size)

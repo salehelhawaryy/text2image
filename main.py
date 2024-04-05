@@ -447,6 +447,7 @@ def train(dataloader, ixtoword, netG, netD, text_encoder, image_encoder,
             torch.save(netG.state_dict(), '%s/models/netG_%03d.pth' % (base_dir, epoch))
         if (epoch >= cfg.TRAIN.WARMUP_EPOCHS) and (epoch % cfg.TRAIN.DSAVE_INTERVAL == 0):
             torch.save(netD.state_dict(), '%s/models/netD_%03d.pth' % (base_dir, epoch))
+        break
 
 
 if __name__ == "__main__":

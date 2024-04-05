@@ -532,7 +532,7 @@ if __name__ == "__main__":
     text_encoder.eval()
 
     image_encoder = CNN_ENCODER(cfg.TEXT.EMBEDDING_DIM)
-    img_encoder_path = cfg.TEXT.DAMSM_NAME.replace('text_encoder', 'image_encoder')
+    img_encoder_path = 'DAMSMencoders/image_encoder100.pth'
     state_dict = \
         torch.load(img_encoder_path, map_location=lambda storage, loc: storage)
     image_encoder.load_state_dict(state_dict)

@@ -223,6 +223,7 @@ def gen_sample(text_encoder, netG, device, wordtoix):
     batch_size = len(captions)
     s_tmp = model_dir[:model_dir.rfind('.pth')]
     fake_img_save_dir = '%s/%s' % (s_tmp, split_dir)
+    fake_img_save_dir = fake_img_save_dir.replace('/kaggle/input/', '/kaggle/working/')
     mkdir_p(fake_img_save_dir)
 
     for step in range(50):

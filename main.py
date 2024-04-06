@@ -214,6 +214,7 @@ def gen_sample(text_encoder, netG, device, wordtoix):
         cap_len.append(len(i))
 
     caps_lens = torch.tensor(cap_len, dtype=torch.int64).to(device)
+    caps_lens, indices = caps_lens.sort(descending=True)
 
     model_dir = cfg.TRAIN.NET_G
     split_dir = 'valid'

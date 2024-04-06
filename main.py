@@ -173,16 +173,16 @@ def gen_sample(text_encoder, netG, device, wordtoix):
     caption length should be no longer than 18 words.
     example captions see below
     """
-    captions = ['A colorful blue bird has wings with dark stripes and small eyes',
-                'A colorful green bird has wings with dark stripes and small eyes',
-                'A colorful white bird has wings with dark stripes and small eyes',
-                'A colorful black bird has wings with dark stripes and small eyes',
-                'A colorful pink bird has wings with dark stripes and small eyes',
-                'A colorful orange bird has wings with dark stripes and small eyes',
-                'A colorful brown bird has wings with dark stripes and small eyes',
-                'A colorful red bird has wings with dark stripes and small eyes',
-                'A colorful yellow bird has wings with dark stripes and small eyes',
-                'A colorful purple bird has wings with dark stripes and small eyes']
+    # captions = ['A colorful blue bird has wings with dark stripes and small eyes',
+    #             'A colorful green bird has wings with dark stripes and small eyes',
+    #             'A colorful white bird has wings with dark stripes and small eyes',
+    #             'A colorful black bird has wings with dark stripes and small eyes',
+    #             'A colorful pink bird has wings with dark stripes and small eyes',
+    #             'A colorful orange bird has wings with dark stripes and small eyes',
+    #             'A colorful brown bird has wings with dark stripes and small eyes',
+    #             'A colorful red bird has wings with dark stripes and small eyes',
+    #             'A colorful yellow bird has wings with dark stripes and small eyes',
+    #             'A colorful purple bird has wings with dark stripes and small eyes']
 
     # captions = ['A herd of black and white cattle standing on a field',
     #  'A herd of black cattle standing on a field',
@@ -193,10 +193,10 @@ def gen_sample(text_encoder, netG, device, wordtoix):
     #  'A herd of white sheep standing on a field',
     #  'A herd of brown sheep standing on a field']
 
-    # captions = ['some horses in a field of green grass with a sky in the background',
-    #  'some horses in a field of yellow grass with a sky in the background',
-    #  'some horses in a field of green grass with a sunset in the background',
-    #  'some horses in a field of yellow grass with a sunset in the background']
+    captions = ['بعض الخيول في حقل من العشب الأخضر مع سماء في الخلفية',
+     'بعض الخيول في حقل من العشب الأصفر مع سماء في الخلفية',
+     'بعض الخيول في حقل من العشب الأخضر مع غروب الشمس في الخلفية',
+     'بعض الخيول في حقل من العشب الأصفر مع غروب الشمس في الخلفية']
 
     # caption to idx
     # split string to word
@@ -551,7 +551,7 @@ if __name__ == "__main__":
     optimizerD = torch.optim.Adam(netD.parameters(), lr=0.0004, betas=(0.0, 0.9))
 
     if cfg.B_VALIDATION:
-        sampling(text_encoder, netG, dataloader, ixtoword, device)  # generate images for the whole valid dataset
-        #gen_sample(text_encoder, netG, device, wordtoix) # generate images with description from user
+        #sampling(text_encoder, netG, dataloader, ixtoword, device)  # generate images for the whole valid dataset
+        gen_sample(text_encoder, netG, device, wordtoix) # generate images with description from user
     else:
         train(dataloader, ixtoword, netG, netD, text_encoder, image_encoder, optimizerG, optimizerD, state_epoch, batch_size, device)

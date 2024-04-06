@@ -27,7 +27,7 @@ __C.CUDA = True
 __C.WORKERS = 6
 
 __C.RNN_TYPE = 'LSTM'   # 'GRU'
-__C.B_VALIDATION = False
+__C.B_VALIDATION = True
 __C.RESTORE = False
 __C.USE_SN = False
 __C.loss = 'hinge'
@@ -47,7 +47,7 @@ __C.TRAIN.ENCODER_LR = 2e-4
 __C.TRAIN.RNN_GRAD_CLIP = 0.25
 __C.TRAIN.FLAG = True
 __C.TRAIN.NET_E = ''
-__C.TRAIN.NET_G = ''
+__C.TRAIN.NET_G = '/kaggle/input/notebookc823064a6b/models/netG_001.pth'
 __C.TRAIN.B_NET_D = True
 __C.TRAIN.NF = 32
 __C.TRAIN.SMOOTH = edict()

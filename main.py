@@ -241,7 +241,7 @@ def gen_sample(text_encoder, netG, device, wordtoix):
             # noise = noise.repeat(batch_size, 1)
             # use different noise
             noise = []
-            for i in batch_size:
+            for i in range(batch_size):
                 noise.append(torch.randn(1, 100))
             noise = torch.cat(noise,0)
             

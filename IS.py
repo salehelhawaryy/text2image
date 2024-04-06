@@ -15,9 +15,9 @@ import numpy as np
 from six.moves import urllib
 import tensorflow as tf
 import glob
-from scipy.misc import imread, imresize
-# from skimage.transform import resize as imresize
-# from skimage.io import imread
+#from scipy.misc import imread, imresize
+from skimage.transform import resize as imresize
+from skimage.io import imread
 import math
 import sys
 from tqdm import tqdm, trange

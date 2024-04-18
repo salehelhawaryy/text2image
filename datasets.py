@@ -199,7 +199,7 @@ class TextDataset(data.Dataset):
             cap_path = '%s/text/%s.txt' % (data_dir, filenames[i])
             with open(cap_path, "r") as f:
                 #captions = f.read().decode('utf-8').split('\n')
-                captions = f.read().decode('utf-8', 'ignore').split('\n')
+                captions = f.read().split('\n')
                 print(captions)
                 cnt = 0
                 for cap in captions:

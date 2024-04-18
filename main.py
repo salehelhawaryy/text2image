@@ -504,7 +504,7 @@ if __name__ == "__main__":
     if cfg.B_VALIDATION:
         dataset = TextDataset(cfg.DATA_DIR, 'test',
                               base_size=cfg.TREE.BASE_SIZE,
-                              transform=image_transform)
+                              transform=image_transform, is_arabic=False)
         ixtoword = dataset.ixtoword
         wordtoix = dataset.wordtoix
         print(dataset.n_words, dataset.embeddings_num)
@@ -515,7 +515,7 @@ if __name__ == "__main__":
     else:
         dataset = TextDataset(cfg.DATA_DIR, 'train',
                               base_size=cfg.TREE.BASE_SIZE,
-                              transform=image_transform)
+                              transform=image_transform, is_arabic=False)
         ixtoword = dataset.ixtoword
         print(dataset.n_words, dataset.embeddings_num)
         assert dataset

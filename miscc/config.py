@@ -21,7 +21,7 @@ cfg = __C
 # Dataset name: flowers, birds
 __C.DATASET_NAME = 'birds'
 __C.CONFIG_NAME = ''
-__C.DATA_DIR = 'data/ar_coco'
+__C.DATA_DIR = 'data/en_coco'
 __C.GPU_ID = 0
 __C.CUDA = True
 __C.WORKERS = 6

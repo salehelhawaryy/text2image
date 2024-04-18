@@ -141,7 +141,7 @@ def get_imgs(img_path, imsize, bbox=None,
 class TextDataset(data.Dataset):
     def __init__(self, data_dir, split='train',
                  base_size=64,
-                 transform=None, target_transform=None):
+                 transform=None, target_transform=None, is_arabic=True):
         self.transform = transform
         self.norm = transforms.Compose([
             transforms.ToTensor(),
@@ -164,7 +164,7 @@ class TextDataset(data.Dataset):
         split_dir = os.path.join(data_dir, split)
 
         self.filenames, self.captions, self.ixtoword, \
-            self.wordtoix, self.n_words = self.load_text_data(data_dir, split)
+            self.wordtoix, self.n_words = self.load_text_data(data_dir, split, is_arabic)
 
         self.class_id = self.load_class_id(split_dir, len(self.filenames))
         self.number_example = len(self.filenames)
@@ -193,7 +193,7 @@ class TextDataset(data.Dataset):
         #
         return filename_bbox
 
-    def load_captions(self, data_dir, filenames):
+    def load_captions(self, data_dir, filenames, is_arabic):
         all_captions = []
         for i in range(len(filenames)):
             cap_path = '%s/text/%s.txt' % (data_dir, filenames[i])
@@ -206,7 +206,10 @@ class TextDataset(data.Dataset):
                     cap = cap.replace("\ufffd\ufffd", " ")
                     # picks out sequences of alphanumeric characters as tokens
                     # and drops everything else
-                    tokenizer = RegexpTokenizer(r'[\u0621-\u064A]+')
+                    if is_arabic:
+                        tokenizer = RegexpTokenizer(r'[\u0621-\u064A]+')
+                    else:
+                        tokenizer = RegexpTokenizer(r'\w+')
                     tokens = tokenizer.tokenize(cap.lower())
                     # print('tokens', tokens)
                     if len(tokens) == 0:
@@ -266,13 +269,13 @@ class TextDataset(data.Dataset):
         return [train_captions_new, test_captions_new,
                 ixtoword, wordtoix, len(ixtoword)]
 
-    def load_text_data(self, data_dir, split):
+    def load_text_data(self, data_dir, split, is_arabic):
         filepath = os.path.join(data_dir, 'captions.pickle')
         train_names = self.load_filenames(data_dir, 'train_ar')
         test_names = self.load_filenames(data_dir, 'test_ar')
         if not os.path.isfile(filepath):
-            train_captions = self.load_captions(data_dir, train_names)
-            test_captions = self.load_captions(data_dir, test_names)
+            train_captions = self.load_captions(data_dir, train_names, is_arabic)
+            test_captions = self.load_captions(data_dir, test_names, is_arabic)
 
             train_captions, test_captions, ixtoword, wordtoix, n_words = \
                 self.build_dictionary(train_captions, test_captions)

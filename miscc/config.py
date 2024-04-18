@@ -47,7 +47,7 @@ __C.TRAIN.ENCODER_LR = 2e-4
 __C.TRAIN.RNN_GRAD_CLIP = 0.25
 __C.TRAIN.FLAG = True
 __C.TRAIN.NET_E = ''
-__C.TRAIN.NET_G = '/kaggle/input/notebookc823064a6b/models/netG_001.pth'
+__C.TRAIN.NET_G = '/kaggle/input/pre-trained-sem-gan/other/ver1/1/netG_120.pth'
 __C.TRAIN.B_NET_D = True
 __C.TRAIN.NF = 32
 __C.TRAIN.SMOOTH = edict()
@@ -75,7 +75,7 @@ __C.TEXT = edict()
 __C.TEXT.CAPTIONS_PER_IMAGE = 5
 __C.TEXT.EMBEDDING_DIM = 256
 __C.TEXT.WORDS_NUM = 18
-__C.TEXT.DAMSM_NAME = 'DAMSMencoders/text_encoder_ar.pth'
+__C.TEXT.DAMSM_NAME = 'DAMSMencoders/text_encoder100.pth'
 
 def _merge_a_into_b(a, b):
     """Merge config dictionary a into config dictionary b, clobbering the

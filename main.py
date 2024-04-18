@@ -192,11 +192,15 @@ def gen_sample(text_encoder, netG, device, wordtoix):
     #  'A herd of black sheep standing on a field',
     #  'A herd of white sheep standing on a field',
     #  'A herd of brown sheep standing on a field']
+    captions = ['Some horses in a field of yellow grass with sunset in the background',
+                'Some horses in a field of green grass with the sun setting in the background',
+                'Some horses in a field of yellow grass with sky in the background',
+                'Some horses in a field of green grass with sky in the background']
 
-    captions = ['بعض الخيول في حقل من العشب الأخضر مع سماء في الخلفية',
-     'بعض الخيول في حقل من العشب الأصفر مع سماء في الخلفية',
-     'بعض الخيول في حقل من العشب الأخضر مع غروب الشمس في الخلفية',
-     'بعض الخيول في حقل من العشب الأصفر مع غروب الشمس في الخلفية']
+    # captions = ['بعض الخيول في حقل من العشب الأخضر مع سماء في الخلفية',
+    #  'بعض الخيول في حقل من العشب الأصفر مع سماء في الخلفية',
+    #  'بعض الخيول في حقل من العشب الأخضر مع غروب الشمس في الخلفية',
+    #  'بعض الخيول في حقل من العشب الأصفر مع غروب الشمس في الخلفية']
 
     # caption to idx
     # split string to word

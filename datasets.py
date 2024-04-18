@@ -271,8 +271,12 @@ class TextDataset(data.Dataset):
 
     def load_text_data(self, data_dir, split, is_arabic):
         filepath = os.path.join(data_dir, 'captions.pickle')
-        train_names = self.load_filenames(data_dir, 'train_ar')
-        test_names = self.load_filenames(data_dir, 'test_ar')
+        if is_arabic:
+            train_names = self.load_filenames(data_dir, 'train_ar')
+            test_names = self.load_filenames(data_dir, 'test_ar')
+        else:
+            train_names = self.load_filenames(data_dir, 'train_en')
+            test_names = self.load_filenames(data_dir, 'test_en')
         if not os.path.isfile(filepath):
             train_captions = self.load_captions(data_dir, train_names, is_arabic)
             test_captions = self.load_captions(data_dir, test_names, is_arabic)

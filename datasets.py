@@ -200,7 +200,7 @@ class TextDataset(data.Dataset):
             with open(cap_path, "r") as f:
                 #captions = f.read().decode('utf-8').split('\n')
                 captions = f.read().split('\n')
-                print(captions)
+               # print(captions)
                 cnt = 0
                 for cap in captions:
                     if len(cap) == 0:

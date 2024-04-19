@@ -192,10 +192,10 @@ def gen_sample(text_encoder, netG, device, wordtoix):
     #  'A herd of black sheep standing on a field',
     #  'A herd of white sheep standing on a field',
     #  'A herd of brown sheep standing on a field']
-    captions = ['Some horses in a field of yellow grass with sunset in the background',
-                'Some horses in a field of green grass with the sun setting in the background',
-                'Some horses in a field of yellow grass with sky in the background',
-                'Some horses in a field of green grass with sky in the background']
+    captions = ['A close up of a boat on a field with a cloudy sky',
+                'Some cows are standing on the field on a sunny day',
+                'A skier walks through the snow up the slope.',
+                'A herd of elephants walking through a river']
 
     # captions = ['بعض الخيول في حقل من العشب الأخضر مع سماء في الخلفية',
     #  'بعض الخيول في حقل من العشب الأصفر مع سماء في الخلفية',

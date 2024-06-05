@@ -20,8 +20,9 @@ The structure of the spatial-semantic aware (SSA) block  is shown as below
 ## Prepare data
 Download [coco](http://cocodataset.org/#download) dataset and extract the images and modify datasets.py to match the directory containing the images.
 
-## Commented code of Knowledge Distilation with Arabic in DAMSM.py
-## Use TextDatasetDAMSM_Text Class to load both Arabic and English Captions
+## Commented code of Knowledge Distilation with Arabic in DAMSM.py.
+## Use TextDatasetDAMSM_Text Class to load both Arabic and English Captions.
+## Modify coco.yaml file in CFG with correct paths.
 
 ## Pre-trained DAMSM model
 1. Download the [pre-trained DAMSM](https://drive.google.com/open?id=1GNUKjVeyWYBJ8hEU-yrfYQpDOkxEyP3V) for CUB and save it to `DAMSMencoders/`
